@@ -2,22 +2,15 @@
 resource "aws_s3_bucket" "cbz_bucket" {
   bucket = "cbz-frontend-b18" # Replace with a globally unique bucket name
 
+  # Enable static website hosting
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+
   tags = {
-    Name = "StaticWebsiteBucket"
-    env  = "dev"
-  }
-}
-
-# Configure static website hosting (Replaces the deprecated "website" block)
-resource "aws_s3_bucket_website_configuration" "cbz_website_config" {
-  bucket = aws_s3_bucket.cbz_bucket.id
-
-  index_document {
-    suffix = "index.html"
-  }
-
-  error_document {
-    key = "error.html"
+    Name        = "StaticWebsiteBucket"
+    env = "dev"
   }
 }
 
@@ -30,7 +23,6 @@ resource "aws_s3_bucket_public_access_block" "example" {
   ignore_public_acls      = false
   restrict_public_buckets = false
 }
-
 # Set the bucket policy to allow public read access (use cautiously)
 resource "aws_s3_bucket_policy" "static_website_policy" {
   bucket = aws_s3_bucket.cbz_bucket.id
@@ -49,8 +41,8 @@ resource "aws_s3_bucket_policy" "static_website_policy" {
   depends_on = [aws_s3_bucket_public_access_block.example]
 }
 
-# Output the bucket's website endpoint (Updated)
+# Output the bucket's website endpoint
 output "website_endpoint" {
-  value       = aws_s3_bucket_website_configuration.cbz_website_config.website_endpoint
+  value       = aws_s3_bucket.cbz_bucket.website_endpoint
   description = "The URL to access the static website"
 }
